@@ -28,16 +28,18 @@ PROJECT_DEFINES 	:=	'MBEDTLS_CONFIG_FILE="config_mbedtls.h"'
 
 PROJECT_SOURCES		:=	./main.c \
 						$(shell find $(FOLDER_PLATFORMS) -regex '.*.c' -type f) \
-						$(shell find $(FOLDER_STSELIB) -regex '.*.c' -type f)
-#						$(shell find $(FOLDER_MBEDTLS)/library -regex '.*.c' -type f)
+						$(shell find $(FOLDER_STSELIB) -regex '.*.c' -type f) \
+						$(shell find $(FOLDER_MBEDTLS)/tf-psa-crypto/drivers/builtin -regex '.*.c' -type f)
 
 PROJECT_INCLUDES	:=	${FOLDER_STSELIB} \
 						${FOLDER_PLATFORMS}/STSELib \
 						${FOLDER_PLATFORMS}/Drivers \
-						${FOLDER_PLATFORMS}
-#						${FOLDER_MBEDTLS}/include \
-#						${FOLDER_MBEDTLS}/library \
-#						${FOLDER_PLATFORMS}/MbedTLS \
+						${FOLDER_PLATFORMS} \
+						${FOLDER_MBEDTLS}/include \
+						${FOLDER_PLATFORMS}/MbedTLS \
+						${FOLDER_MBEDTLS}/tf-psa-crypto/drivers/builtin/include \
+						${FOLDER_MBEDTLS}/tf-psa-crypto/core \
+						${FOLDER_MBEDTLS}/tf-psa-crypto/include
 
 OBJECTS := $(PROJECT_SOURCES:%.c=$(BUILD_DIR)/%.o)
 
