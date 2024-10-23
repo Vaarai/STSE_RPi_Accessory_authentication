@@ -101,18 +101,24 @@ stse_ReturnCode_t stse_platform_ecc_verify(
 	#define CHECH_MBED_RETURN	if (mbedtls_ret != 0) \
 								{mbedtls_ecp_point_free(&public_ecp_point); \
 								 mbedtls_ecp_group_free(&public_ecp_group); \
-								 mbedtls_ecdsa_free(&ctx_verify); \
+								 mbedtls_mpi_free(&r); \
+    							 mbedtls_mpi_free(&s); \
 								 return STSE_PLATFORM_ECC_VERIFY_ERROR;}
 	int mbedtls_ret = 1;
 
+	PLAT_UI8 public_key[stse_ecc_info_table[key_type].public_key_size+1];
     mbedtls_ecp_point public_ecp_point;
 	mbedtls_ecp_group public_ecp_group;
-    mbedtls_ecdsa_context ctx_verify;
+    mbedtls_mpi r;
+	mbedtls_mpi s;
 
+	memcpy(public_key+1,pPubKey,stse_ecc_info_table[key_type].public_key_size);
+	public_key[0] = 0x04;
     mbedtls_ecp_point_init(&public_ecp_point);
 	mbedtls_ecp_group_init(&public_ecp_group);
-    mbedtls_ecdsa_init(&ctx_verify);
-	
+    mbedtls_mpi_init(&r);
+    mbedtls_mpi_init(&s);
+
 	mbedtls_ret = mbedtls_ecp_group_load(
 		&public_ecp_group,
 		stse_ecc_key_type_get_group_id(key_type));
@@ -121,26 +127,34 @@ stse_ReturnCode_t stse_platform_ecc_verify(
 	mbedtls_ret = mbedtls_ecp_point_read_binary(
 		&public_ecp_group,
 		&public_ecp_point,
-		pPubKey,
-		stse_ecc_info_table[key_type].signature_size);
+		public_key,
+		sizeof(public_key));
 	CHECH_MBED_RETURN;
 
-	mbedtls_ret = mbedtls_ecp_set_public_key(
-		stse_ecc_key_type_get_group_id(key_type), 
-		&ctx_verify, 
-		&public_ecp_point);
+	mbedtls_ret = mbedtls_mpi_read_binary(
+		&r, 
+		pSignature, 
+		stse_ecc_info_table[key_type].coordinate_or_key_size);
 	CHECH_MBED_RETURN;
 
-	mbedtls_ret = mbedtls_ecdsa_read_signature(
-		&ctx_verify,
+	mbedtls_ret = mbedtls_mpi_read_binary(
+		&s, 
+		pSignature + stse_ecc_info_table[key_type].coordinate_or_key_size, 
+		stse_ecc_info_table[key_type].coordinate_or_key_size);
+	CHECH_MBED_RETURN;
+
+	mbedtls_ret = mbedtls_ecdsa_verify(
+		&public_ecp_group,
 		pDigest, 
 		digestLen,
-		pSignature, 
-		stse_ecc_info_table[key_type].signature_size);
+		&public_ecp_point,
+		&r,
+		&s);
 
 	mbedtls_ecp_point_free(&public_ecp_point);
 	mbedtls_ecp_group_free(&public_ecp_group);
-    mbedtls_ecdsa_free(&ctx_verify);
+	mbedtls_mpi_free(&r);
+	mbedtls_mpi_free(&s);
 	if (mbedtls_ret != 0)
 	{
 		return STSE_PLATFORM_ECC_VERIFY_ERROR;
