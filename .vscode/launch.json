@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GDB Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "MIMode": "gdb",
+            "program": "${workspaceRoot}/build/accessory_authentication",
+            "miDebuggerServerAddress": "164.129.203.141:4444",
+            "miDebuggerPath": "C:/SysGCC/raspberry/bin/arm-linux-gnueabihf-gdb.exe",
+            "cwd": "${workspaceRoot}",
+            "stopAtEntry": true,
+        }
+    ]
+}
